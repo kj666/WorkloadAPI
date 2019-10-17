@@ -23,7 +23,7 @@ namespace Workload.Models
 
         public long BatchId { get; set; }
 
-        public long BatchSize { get; set; 
+        public long BatchSize { get; set; }
 
     }
 }
