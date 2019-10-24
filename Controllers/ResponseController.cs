@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace Workload.Controllers
 {
@@ -11,6 +12,8 @@ namespace Workload.Controllers
     [ApiController]
     public class ResponseController : ControllerBase
     {
+        string path_DVD_Test = "C:/dev/Workload/Data/DVD-testing.csv";
+
         // GET: api/Response
         [HttpGet]
         public IEnumerable<string> Get()
@@ -22,7 +25,23 @@ namespace Workload.Controllers
         [HttpGet("{id}", Name = "Get")]
         public string Get(int id)
         {
-            return "value";
+            return ParseCsv();
+        }
+
+        public string ParseCsv() { 
+
+            string[] lines = System.IO.File.ReadAllLines(path_DVD_Test);
+            string output = "";
+            foreach (string line in lines)
+            {
+                string[] columns = line.Split(',');
+                foreach(string column in columns)
+                {
+                    output = (output +" "+column);
+                }
+                output = output + "\n";
+            }
+            return output;
         }
 
         // POST: api/Response
