@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Workload.Models;
 
 namespace Workload.Controllers
 {
@@ -13,6 +14,9 @@ namespace Workload.Controllers
     public class ResponseController : ControllerBase
     {
         string path_DVD_Test = "C:/dev/Workload/Data/DVD-testing.csv";
+        string path_DVD_Train = "C:/dev/Workload/Data/DVD-training.csv";
+        string path_NDB_Test = "C:/dev/Workload/Data/NDBench-testing.csv";
+        string path_NDB_Train = "C:/dev/Workload/Data/NDBench-training.csv";
 
         // GET: api/Response
         [HttpGet]
@@ -32,6 +36,7 @@ namespace Workload.Controllers
 
             string[] lines = System.IO.File.ReadAllLines(path_DVD_Test);
             string output = "";
+            int count = 0;
             foreach (string line in lines)
             {
                 string[] columns = line.Split(',');
@@ -40,10 +45,59 @@ namespace Workload.Controllers
                     output = (output +" "+column);
                 }
                 output = output + "\n";
+                count++;
+                if (count == 10)
+                    break;
             }
             return output;
         }
 
+        [HttpGet("Request")]
+        public int GetRequestBody([FromBody] RfwRequest content)
+        {
+            string path = "";
+
+            //choose which file to read from
+            if (content.BenchmarkType == BenchMarkType.DVDTest)
+                path = path_DVD_Test;
+            else if (content.BenchmarkType == BenchMarkType.DVDTrain)
+                path = path_DVD_Train;
+            else if (content.BenchmarkType == BenchMarkType.NDBenchTest)
+                path = path_NDB_Test;
+            else if (content.BenchmarkType == BenchMarkType.NDBenchTrain)
+                path = path_NDB_Train;
+
+            int totalLine = GetNumberLine(path);
+            int numberBatch = 0;
+            int lineStart = 0;
+
+            if (content.BatchUnit != 0)
+            {
+                decimal tmp = totalLine / content.BatchUnit;
+                numberBatch = (int)Math.Ceiling(tmp);
+            }
+
+            lineStart = content.BatchUnit * content.BatchId;
+            if (content.BatchId > numberBatch)
+                lineStart = 0;
+
+            return lineStart;
+        }
+
+        [HttpGet("Response")]
+        public RfwResponse GetResponse()
+        {
+            return null;
+        }
+        /// <summary>
+        /// Get total number of line in a file
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public int GetNumberLine(string path)
+        {
+            return System.IO.File.ReadAllLines(path).Count();
+        }
         // POST: api/Response
         [HttpPost]
         public void Post([FromBody] string value)
