@@ -55,8 +55,8 @@ namespace Workload.Controllers
         [HttpGet("Request")]
         public int GetRequestBody([FromBody] RfwRequest content)
         {
+           
             string path = "";
-
             //choose which file to read from
             if (content.BenchmarkType == BenchMarkType.DVDTest)
                 path = path_DVD_Test;
@@ -84,10 +84,11 @@ namespace Workload.Controllers
             return lineStart;
         }
 
+
         [HttpGet("Response")]
-        public RfwResponse GetResponse()
+        public List<Models.Workload> GetResponse()
         {
-            return null;
+            return Data.DVDTrain;
         }
         /// <summary>
         /// Get total number of line in a file

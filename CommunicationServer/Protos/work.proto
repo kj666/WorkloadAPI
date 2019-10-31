@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option csharp_namespace = "CommunicationServer";
+
+package Work;
+
+// The greeting service definition.
+service Workload {
+  // Sends a greeting
+  rpc SayHello (HelloRequest) returns (HelloReply);
+  rpc GetWorkload (WorkloadRequest) returns (WorkloadReply);
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings.
+message HelloReply {
+  string message = 1;
+}
+
+message WorkloadRequest {
+	string rfw = 1;
+	string benchMark = 2;
+	int32 metric = 3;
+	int32 batchUnit = 4;
+	int32 batchId = 5;
+	int32 batchSize = 6;
+}
+
+message WorkloadReply{
+	string message = 1;
+}

@@ -40,7 +40,8 @@ namespace Workload.Models
         CPU = 0,
         NetworkIn = 1,
         NetworkOut = 2,
-        Memory = 3
+        Memory = 3,
+        FinalTarget = 4
     }
 
     public class RfwResponse
@@ -66,6 +67,8 @@ namespace Workload.Models
 
         public double MemoryUtilization_Average { get; set; }
 
+        public double FinalTarget { get; set; }
+
     }
 
     public class Batch
@@ -73,5 +76,53 @@ namespace Workload.Models
         public int Id { get; set; }
 
         public List<Workload> workloads { get; set; }
+    }
+
+    public static class Data
+    {
+        public static List<Workload> DVDTrain = new List<Workload>();
+        public static List<Workload> DVDTest = new List<Workload>();
+        public static List<Workload> NDBTrain = new List<Workload>();
+        public static List<Workload> NDBTest = new List<Workload>();
+
+        public static string path_DVD_Test = "C:/dev/Workload/Data/DVD-testing.csv";
+        public static string path_DVD_Train = "C:/dev/Workload/Data/DVD-training.csv";
+        public static string path_NDB_Test = "C:/dev/Workload/Data/NDBench-testing.csv";
+        public static string path_NDB_Train = "C:/dev/Workload/Data/NDBench-training.csv";
+
+        public static void PopulateList()
+        {
+            DVDTrain = ParseCsv(path_DVD_Train);
+            DVDTest = ParseCsv(path_DVD_Test);
+            NDBTrain = ParseCsv(path_NDB_Train);
+            NDBTest = ParseCsv(path_NDB_Test);
+        }
+
+        public static List<Workload> ParseCsv(string path)
+        {
+            List<Workload> list = new List<Workload>();
+
+            string[] lines = System.IO.File.ReadAllLines(path);
+
+            for(int i = 1; i < lines.Count(); i++) { 
+                string[] columns = lines[i].Split(',');
+
+                Workload workload = new Workload();
+                workload.LineID = i;
+                for(int col = 0; col < columns.Count(); col++)
+                {
+                    if (col == 0)
+                        workload.CPUUtilization_Average = double.Parse(columns[col]);
+                    else if (col == 1)
+                        workload.NetworkIn_Average = double.Parse(columns[col]);
+                    else if (col == 2)
+                        workload.NetworkOut_Average = double.Parse(columns[col]);
+                    else if (col == 3)
+                        workload.MemoryUtilization_Average = double.Parse(columns[col]);
+                }
+                list.Add(workload);
+            }
+            return list;
+        }
     }
 }
