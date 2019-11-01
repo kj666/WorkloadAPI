@@ -85,10 +85,11 @@ namespace Workload.Models
         public static List<Workload> NDBTrain = new List<Workload>();
         public static List<Workload> NDBTest = new List<Workload>();
 
-        public static string path_DVD_Test = "C:/dev/Workload/Data/DVD-testing.csv";
-        public static string path_DVD_Train = "C:/dev/Workload/Data/DVD-training.csv";
-        public static string path_NDB_Test = "C:/dev/Workload/Data/NDBench-testing.csv";
-        public static string path_NDB_Train = "C:/dev/Workload/Data/NDBench-training.csv";
+        public static string main_path = "D:/Karthi/Document/Karthi/WorkloadAPI/RestAPI/Data";
+        public static string path_DVD_Test = main_path + "/DVD-testing.csv";
+        public static string path_DVD_Train = main_path + "/DVD-training.csv";
+        public static string path_NDB_Test = main_path + "/NDBench-testing.csv";
+        public static string path_NDB_Train = main_path + "/NDBench-training.csv";
 
         public static void PopulateList()
         {
