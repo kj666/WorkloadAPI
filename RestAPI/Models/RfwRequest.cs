@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Workload.Models
@@ -9,14 +12,8 @@ namespace Workload.Models
     {
         public string RfwID { get; set; }
 
-        /// <summary>
-        /// DVD or NDBench
-        /// </summary>
         public BenchMarkType BenchmarkType { get; set; }
 
-        /// <summary>
-        /// Type of workload Metric (CPU or NetworkIn or NetworkOut or Memory)
-        /// </summary>
         public WorkloadType WorloadMetric { get; set; }
 
         public Int32 BatchUnit { get; set; }
@@ -75,7 +72,7 @@ namespace Workload.Models
     {
         public int Id { get; set; }
 
-        public List<Workload> workloads { get; set; }
+        public List<Workload> Workloads { get; set; }
     }
 
     public static class Data
@@ -85,7 +82,7 @@ namespace Workload.Models
         public static List<Workload> NDBTrain = new List<Workload>();
         public static List<Workload> NDBTest = new List<Workload>();
 
-        public static string main_path = "D:/Karthi/Document/Karthi/WorkloadAPI/RestAPI/Data";
+        public static string main_path = Path.Combine(Environment.CurrentDirectory) + "/Data";
         public static string path_DVD_Test = main_path + "/DVD-testing.csv";
         public static string path_DVD_Train = main_path + "/DVD-training.csv";
         public static string path_NDB_Test = main_path + "/NDBench-testing.csv";
@@ -120,6 +117,8 @@ namespace Workload.Models
                         workload.NetworkOut_Average = double.Parse(columns[col]);
                     else if (col == 3)
                         workload.MemoryUtilization_Average = double.Parse(columns[col]);
+                    else if (col == 4)
+                        workload.FinalTarget = double.Parse(columns[col]);
                 }
                 list.Add(workload);
             }

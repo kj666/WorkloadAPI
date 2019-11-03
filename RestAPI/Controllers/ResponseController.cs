@@ -6,115 +6,96 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Workload.Models;
+using Workload;
+using System.Text.Json.Serialization;
 
 namespace Workload.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class ResponseController : ControllerBase
     {
-        string path_DVD_Test = "C:/dev/Workload/Data/DVD-testing.csv";
-        string path_DVD_Train = "C:/dev/Workload/Data/DVD-training.csv";
-        string path_NDB_Test = "C:/dev/Workload/Data/NDBench-testing.csv";
-        string path_NDB_Train = "C:/dev/Workload/Data/NDBench-training.csv";
-
-        // GET: api/Response
         [HttpGet]
-        public IEnumerable<string> Get()
+        public RfwResponse GetRequestBody([FromBody] RfwRequest content)
         {
-            return new string[] { "value1", "value2" };
-        }
+            string val = "";
+            int numberBatch = 0;
+            int startID = 0;
+            int totalCount = 0;
+            RfwResponse response = new RfwResponse();
+            response.Batches = new List<Batch>();
 
-        // GET: api/Response/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
-        {
-            return ParseCsv();
-        }
 
-        public string ParseCsv() { 
+            List<Workload.Models.Workload> wkldList = new List<Workload.Models.Workload>();
 
-            string[] lines = System.IO.File.ReadAllLines(path_DVD_Test);
-            string output = "";
-            int count = 0;
-            foreach (string line in lines)
-            {
-                string[] columns = line.Split(',');
-                foreach(string column in columns)
-                {
-                    output = (output +" "+column);
-                }
-                output = output + "\n";
-                count++;
-                if (count == 10)
-                    break;
-            }
-            return output;
-        }
-
-        [HttpGet("Request")]
-        public int GetRequestBody([FromBody] RfwRequest content)
-        {
-           
-            string path = "";
             //choose which file to read from
             if (content.BenchmarkType == BenchMarkType.DVDTest)
-                path = path_DVD_Test;
+                wkldList = Data.DVDTest;
             else if (content.BenchmarkType == BenchMarkType.DVDTrain)
-                path = path_DVD_Train;
+                wkldList = Data.DVDTrain;
             else if (content.BenchmarkType == BenchMarkType.NDBenchTest)
-                path = path_NDB_Test;
+                wkldList = Data.NDBTest;
             else if (content.BenchmarkType == BenchMarkType.NDBenchTrain)
-                path = path_NDB_Train;
+                wkldList = Data.NDBTrain;
+            else
+            {
+                response.RfwID = "BenchmarkType " + content.BenchmarkType + " does not exist";
+                return response;
+            }
 
-            int totalLine = GetNumberLine(path);
-            int numberBatch = 0;
-            int lineStart = 0;
-
+            totalCount = ListCount(ref wkldList);
+            
             if (content.BatchUnit != 0)
             {
-                decimal tmp = totalLine / content.BatchUnit;
+                decimal tmp = totalCount / content.BatchUnit;
+                //round total number of batch
                 numberBatch = (int)Math.Ceiling(tmp);
             }
 
-            lineStart = content.BatchUnit * content.BatchId;
-            if (content.BatchId > numberBatch)
-                lineStart = 0;
+            startID = content.BatchUnit * content.BatchId;
 
-            return lineStart;
+            if (content.BatchId > numberBatch)
+                startID = 0;
+
+            val = "TotalCount: " + totalCount +
+                  "\nBatchCount: " + numberBatch +
+                  "\nStartID: "+startID +
+                  "\nBatchId: " + content.BatchId;
+
+            int start = startID;
+            for (int j = content.BatchId; j < content.BatchId + content.BatchSize; j++)
+            {
+                Batch batch = new Batch();
+                batch.Id = j;
+                batch.Workloads = new List<Models.Workload>();
+                for (int i = start; i < start + content.BatchUnit; i++)
+                {
+                    batch.Workloads.Add(wkldList[i]);
+                }
+                start += content.BatchUnit;
+                response.Batches.Add(batch);
+            }
+            response.LastBatchId = content.BatchId + content.BatchSize - 1;
+            response.RfwID = val;
+
+            return response;
         }
 
 
-        [HttpGet("Response")]
+        [HttpGet("all")]
         public List<Models.Workload> GetResponse()
         {
             return Data.DVDTrain;
         }
+
         /// <summary>
         /// Get total number of line in a file
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        public int GetNumberLine(string path)
+        public int ListCount(ref List<Workload.Models.Workload> listWorkload)
         {
-            return System.IO.File.ReadAllLines(path).Count();
-        }
-        // POST: api/Response
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT: api/Response/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            return listWorkload.Count;
         }
     }
 }
