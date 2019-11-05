@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace CommunicationServer.Models
 {
-    public class RfwRequest
+    public class Request
     {
         public string RfwID { get; set; }
 
         public BenchMarkType BenchmarkType { get; set; }
 
-        public WorkloadType WorloadMetric { get; set; }
+        public MetricType WorloadMetric { get; set; }
 
         public Int32 BatchUnit { get; set; }
 
@@ -32,7 +32,7 @@ namespace CommunicationServer.Models
         NDBenchTest = 3
     };
 
-    public enum WorkloadType
+    public enum MetricType
     {
         CPU = 0,
         NetworkIn = 1,
@@ -41,7 +41,7 @@ namespace CommunicationServer.Models
         FinalTarget = 4
     }
 
-    public class RfwResponse
+    public class Response
     {
         public string RfwID { get; set; }
 

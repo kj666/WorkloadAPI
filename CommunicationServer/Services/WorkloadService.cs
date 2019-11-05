@@ -17,15 +17,6 @@ namespace CommunicationServer
             _logger = logger;
         }
 
-        public override Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context)
-        {
-
-            return Task.FromResult(new HelloReply
-            {
-                Message = "Hello " + request
-            });
-        }
-
         public override Task<WorkloadResponse> GetWorkload(WorkloadRequest request, ServerCallContext context)
         {
             return Task.FromResult(GetRequestBody(request)); 
@@ -36,7 +27,7 @@ namespace CommunicationServer
             string val = "";
             int numberBatch = 0;
             WorkloadResponse response = new WorkloadResponse();
-
+            response.Rfw = content.Rfw;
             List<CommunicationServer.Models.Workload> wkldList = new List<CommunicationServer.Models.Workload>();
 
             //choose which file to read from
@@ -50,12 +41,13 @@ namespace CommunicationServer
                 wkldList = Data.NDBTrain;
             else
             {
-                response.Rfw = "Benchmark doesnot exist";
+                response.LastBatchId = "Error: Benchmark doesnot exist";
                 return response;
             }
 
             int totalCount = ListCount(ref wkldList);
 
+            //avoid division by 0
             if (content.BatchUnit != 0)
             {
                 decimal tmp = totalCount / content.BatchUnit;
@@ -63,27 +55,64 @@ namespace CommunicationServer
                 numberBatch = (int)Math.Ceiling(tmp);
             }
 
+            //Compute batch start id
             int startID = content.BatchUnit * content.BatchId;
 
             if (content.BatchId > numberBatch)
-                startID = 0;
+            {
+                response.LastBatchId = "Error: BatchId exceeds number of Batch";
+                return response;
+            }
 
             int start = startID;
-            for (int j = content.BatchId; j < content.BatchId + content.BatchSize; j++)
+            //Verify if batchsize ends
+            int end = content.BatchId + content.BatchSize;
+            if (end > numberBatch)
+                end = numberBatch;
+
+            for (int j = content.BatchId; j <= end; j++)
             {
-                Batch batch = new Batch();
-                batch.BatchId = j;
-                for (int i = start; i < start + content.BatchUnit; i++)
+                Batch batch = new Batch()
                 {
-                    batch.Values.Add(wkldList[i].MemoryUtilization_Average);
+                    BatchId = j
+                };
+                if (end == j)
+                {
+                    for (int i = start; i < wkldList.Count; i++)
+                    {
+                        batch.Values.Add(VerifyMetric(wkldList[i], content.Metric));
+                    }
+                }
+                else
+                {
+                    for (int i = start; i < start + content.BatchUnit; i++)
+                    {
+                        batch.Values.Add(VerifyMetric(wkldList[i], content.Metric));
+                    }
                 }
                 start += content.BatchUnit;
                 response.Batches.Add(batch);
             }
-            response.LastBatchId = (content.BatchId + content.BatchSize - 1).ToString();
-            response.Rfw = content.Rfw;
-
+            response.LastBatchId = (end - 1).ToString();
+            
             return response;
+        }
+
+        public double VerifyMetric(CommunicationServer.Models.Workload work, WorkloadRequest.Types.MetricType type)
+        {
+            double result = 0;
+            if (type == WorkloadRequest.Types.MetricType.Cpu)
+                result = work.CPUUtilization_Average;
+            else if(type == WorkloadRequest.Types.MetricType.NetworkIn)
+                result = work.NetworkIn_Average;
+            else if (type == WorkloadRequest.Types.MetricType.NetworkOut)
+                result = work.NetworkOut_Average;
+            else if (type == WorkloadRequest.Types.MetricType.Memory)
+                result = work.MemoryUtilization_Average;
+            else if (type == WorkloadRequest.Types.MetricType.FinalTarget)
+                result = work.FinalTarget;
+
+            return result;
         }
 
 

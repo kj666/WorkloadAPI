@@ -4,21 +4,10 @@ option csharp_namespace = "GrpcWorload";
 
 package Work;
 
-// The greeting service definition.
+// The workload service definition.
 service Workload {
-  // Sends a greeting
-  rpc SayHello (HelloRequest) returns (HelloReply);
+  // Sends a Request
   rpc GetWorkload (WorkloadRequest) returns (WorkloadResponse);
-}
-
-// The request message containing the user's name.
-message HelloRequest {
-  string name = 1;
-}
-
-// The response message containing the greetings.
-message HelloReply {
-  string message = 1;
 }
 
 //workload Request
@@ -29,7 +18,7 @@ message WorkloadRequest {
         NDBenchTrain = 2;
         NDBenchTest = 3;
 	}
-	enum WorkloadType{
+	enum MetricType{
 		CPU = 0;
         NetworkIn = 1;
         NetworkOut = 2;
@@ -38,12 +27,11 @@ message WorkloadRequest {
 	}
 	string rfw = 1;
 	BenchMarkType benchMark = 2;
-	WorkloadType metric = 3;
+	MetricType metric = 3;
 	int32 batchUnit = 4;
 	int32 batchId = 5;
 	int32 batchSize = 6;
 }
-
 
 //Workload Response
 message WorkloadResponse{
@@ -52,7 +40,8 @@ message WorkloadResponse{
 	repeated Batch batches = 3;
 }
 
+//batch
 message Batch{
 	int32 batchId = 1;
-	repeated double values = 2 [packed=true];
+	repeated double values = 2;
 }
