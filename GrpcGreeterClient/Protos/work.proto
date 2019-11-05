@@ -8,7 +8,7 @@ package Work;
 service Workload {
   // Sends a greeting
   rpc SayHello (HelloRequest) returns (HelloReply);
-  rpc GetWorkload (WorkloadRequest) returns (WorkloadReply);
+  rpc GetWorkload (WorkloadRequest) returns (WorkloadResponse);
 }
 
 // The request message containing the user's name.
@@ -21,15 +21,38 @@ message HelloReply {
   string message = 1;
 }
 
+//workload Request
 message WorkloadRequest {
+	enum BenchMarkType {
+		DVDTrain = 0;
+        DVDTest = 1;
+        NDBenchTrain = 2;
+        NDBenchTest = 3;
+	}
+	enum WorkloadType{
+		CPU = 0;
+        NetworkIn = 1;
+        NetworkOut = 2;
+        Memory = 3;
+        FinalTarget = 4;
+	}
 	string rfw = 1;
-	string benchMark = 2;
-	int32 metric = 3;
+	BenchMarkType benchMark = 2;
+	WorkloadType metric = 3;
 	int32 batchUnit = 4;
 	int32 batchId = 5;
 	int32 batchSize = 6;
 }
 
-message WorkloadReply{
-	string message = 1;
+
+//Workload Response
+message WorkloadResponse{
+	string rfw = 1;
+	string LastBatchId = 2;
+	repeated Batch batches = 3;
+}
+
+message Batch{
+	int32 batchId = 1;
+	repeated double values = 2 [packed=true];
 }

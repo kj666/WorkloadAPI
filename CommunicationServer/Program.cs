@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using CommunicationServer.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
@@ -12,6 +13,7 @@ namespace CommunicationServer
     {
         public static void Main(string[] args)
         {
+            Data.PopulateList();
             CreateHostBuilder(args).Build().Run();
         }
 

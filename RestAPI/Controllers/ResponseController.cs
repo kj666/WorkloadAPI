@@ -20,8 +20,6 @@ namespace Workload.Controllers
         {
             string val = "";
             int numberBatch = 0;
-            int startID = 0;
-            int totalCount = 0;
             RfwResponse response = new RfwResponse();
             response.Batches = new List<Batch>();
 
@@ -43,7 +41,7 @@ namespace Workload.Controllers
                 return response;
             }
 
-            totalCount = ListCount(ref wkldList);
+            int totalCount = ListCount(ref wkldList);
             
             if (content.BatchUnit != 0)
             {
@@ -52,7 +50,7 @@ namespace Workload.Controllers
                 numberBatch = (int)Math.Ceiling(tmp);
             }
 
-            startID = content.BatchUnit * content.BatchId;
+            int startID = content.BatchUnit * content.BatchId;
 
             if (content.BatchId > numberBatch)
                 startID = 0;

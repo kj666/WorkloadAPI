@@ -36,15 +36,15 @@ namespace GrpcGreeterClient
             var reply = await client.GetWorkloadAsync(new WorkloadRequest
             {
                 Rfw = rfw,
-                BenchMark = benchmark,
-                Metric = Int32.Parse(metric),
+                BenchMark = (WorkloadRequest.Types.BenchMarkType)Enum.Parse(typeof(WorkloadRequest.Types.BenchMarkType), benchmark),
+                Metric = (WorkloadRequest.Types.WorkloadType)Enum.Parse(typeof(WorkloadRequest.Types.WorkloadType), metric),
                 BatchUnit = Int32.Parse(batchUnit),
                 BatchId = Int32.Parse(batchId),
                 BatchSize = Int32.Parse(batchSize)
             }) ;
             
 
-            Console.WriteLine("Greeting: " + reply.Message);
+            Console.WriteLine("Greeting: " + reply);
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
         }
