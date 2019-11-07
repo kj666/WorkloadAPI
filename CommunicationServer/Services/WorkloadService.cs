@@ -24,8 +24,9 @@ namespace CommunicationServer
 
         public WorkloadResponse GetRequestBody(WorkloadRequest content)
         {
-            string val = "";
             int numberBatch = 0;
+            //Compute batch start id
+            int startID = content.BatchUnit * content.BatchId;
             WorkloadResponse response = new WorkloadResponse();
             response.Rfw = content.Rfw;
             List<CommunicationServer.Models.Workload> wkldList = new List<CommunicationServer.Models.Workload>();
@@ -41,23 +42,19 @@ namespace CommunicationServer
                 wkldList = Data.NDBTrain;
             else
             {
-                response.LastBatchId = "Error: Benchmark doesnot exist";
+                response.LastBatchId = "Error: Benchmark does not exist";
                 return response;
             }
-
-            int totalCount = ListCount(ref wkldList);
 
             //avoid division by 0
             if (content.BatchUnit != 0)
             {
-                decimal tmp = totalCount / content.BatchUnit;
+                decimal tmp = ListCount(ref wkldList) / content.BatchUnit;
                 //round total number of batch
                 numberBatch = (int)Math.Ceiling(tmp);
             }
 
-            //Compute batch start id
-            int startID = content.BatchUnit * content.BatchId;
-
+           
             if (content.BatchId > numberBatch)
             {
                 response.LastBatchId = "Error: BatchId exceeds number of Batch";
@@ -69,6 +66,7 @@ namespace CommunicationServer
             int end = content.BatchId + content.BatchSize;
             if (end > numberBatch)
                 end = numberBatch;
+            int last = end;
 
             for (int j = content.BatchId; j <= end; j++)
             {
@@ -76,12 +74,13 @@ namespace CommunicationServer
                 {
                     BatchId = j
                 };
-                if (end == j)
+                if (numberBatch == j)
                 {
                     for (int i = start; i < wkldList.Count; i++)
                     {
                         batch.Values.Add(VerifyMetric(wkldList[i], content.Metric));
                     }
+                    last = numberBatch + 1;
                 }
                 else
                 {
@@ -93,7 +92,7 @@ namespace CommunicationServer
                 start += content.BatchUnit;
                 response.Batches.Add(batch);
             }
-            response.LastBatchId = (end - 1).ToString();
+            response.LastBatchId = (last - 1).ToString();
             
             return response;
         }

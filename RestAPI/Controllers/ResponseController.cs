@@ -1,13 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 using Workload.Models;
-using Workload;
-using System.Text.Json.Serialization;
 
 namespace Workload.Controllers
 {
@@ -18,12 +12,10 @@ namespace Workload.Controllers
         [HttpGet]
         public RfwResponse GetRequestBody([FromBody] RfwRequest content)
         {
-            string val = "";
             int numberBatch = 0;
+            int startID = content.BatchUnit * content.BatchId;
             RfwResponse response = new RfwResponse();
             response.Batches = new List<Batch>();
-
-
             List<Workload.Models.Workload> wkldList = new List<Workload.Models.Workload>();
 
             //choose which file to read from
@@ -40,41 +32,60 @@ namespace Workload.Controllers
                 response.RfwID = "BenchmarkType " + content.BenchmarkType + " does not exist";
                 return response;
             }
-
-            int totalCount = ListCount(ref wkldList);
             
             if (content.BatchUnit != 0)
             {
-                decimal tmp = totalCount / content.BatchUnit;
+                decimal tmp = ListCount(ref wkldList) / content.BatchUnit;
                 //round total number of batch
                 numberBatch = (int)Math.Ceiling(tmp);
             }
 
-            int startID = content.BatchUnit * content.BatchId;
-
             if (content.BatchId > numberBatch)
-                startID = 0;
+            {
+                response.RfwID = "Error: BatchId exceeds number of Batch";
+                return response;
+                //startID = 0;
+            }
 
-            val = "TotalCount: " + totalCount +
-                  "\nBatchCount: " + numberBatch +
-                  "\nStartID: "+startID +
-                  "\nBatchId: " + content.BatchId;
+            if(content.WorloadMetric.GetHashCode() > 4)
+            {
+                response.RfwID = "Error: Metric Type does not exists";
+                return response;
+            }
 
             int start = startID;
-            for (int j = content.BatchId; j < content.BatchId + content.BatchSize; j++)
+            int end = content.BatchId + content.BatchSize;
+            if (end > numberBatch)
+                end = numberBatch;
+
+            int last = end;
+
+            for (int j = content.BatchId; j <= end; j++)
             {
                 Batch batch = new Batch();
                 batch.Id = j;
-                batch.Workloads = new List<Models.Workload>();
-                for (int i = start; i < start + content.BatchUnit; i++)
+                batch.values = new List<double>();
+                if (j == numberBatch)
                 {
-                    batch.Workloads.Add(wkldList[i]);
+                    for (int i = start; i < wkldList.Count; i++)
+                    {
+                        batch.values.Add(VerifyMetric(wkldList[i], content.WorloadMetric));
+                    }
+                    last = numberBatch + 1;
+                }
+                else
+                {
+                    for (int i = start; i <= start + content.BatchUnit; i++)
+                    {
+                        batch.values.Add(VerifyMetric(wkldList[i], content.WorloadMetric));
+                    }
                 }
                 start += content.BatchUnit;
                 response.Batches.Add(batch);
             }
-            response.LastBatchId = content.BatchId + content.BatchSize - 1;
-            response.RfwID = val;
+
+            response.LastBatchId = last-1;
+            response.RfwID = content.RfwID;
 
             return response;
         }
@@ -95,5 +106,24 @@ namespace Workload.Controllers
         {
             return listWorkload.Count;
         }
+
+        public double VerifyMetric(Workload.Models.Workload work, Workload.Models.WorkloadType metric)
+        {
+            double result = 0;
+
+            if (metric == Workload.Models.WorkloadType.CPU)
+                result = work.CPUUtilization_Average;
+            else if (metric == Workload.Models.WorkloadType.NetworkIn)
+                result = work.NetworkIn_Average;
+            else if (metric == Workload.Models.WorkloadType.NetworkOut)
+                result = work.NetworkOut_Average;
+            else if (metric == Workload.Models.WorkloadType.Memory)
+                result = work.MemoryUtilization_Average;
+            else if (metric == Workload.Models.WorkloadType.FinalTarget)
+                result = work.FinalTarget;
+
+            return result;
+        }
+
     }
 }

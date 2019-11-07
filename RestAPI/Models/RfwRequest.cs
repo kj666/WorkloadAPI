@@ -72,7 +72,7 @@ namespace Workload.Models
     {
         public int Id { get; set; }
 
-        public List<Workload> Workloads { get; set; }
+        public List<double> values { get; set; }
     }
 
     public static class Data
