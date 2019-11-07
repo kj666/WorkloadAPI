@@ -55,12 +55,12 @@ namespace Workload.Controllers
 
             int start = startID;
             int end = content.BatchId + content.BatchSize;
-            if (end > numberBatch)
-                end = numberBatch;
+            //if (end >= numberBatch)
+            //    end = numberBatch;
 
             int last = end;
 
-            for (int j = content.BatchId; j <= end; j++)
+            for (int j = content.BatchId; j < end; j++)
             {
                 Batch batch = new Batch();
                 batch.Id = j;
@@ -72,10 +72,13 @@ namespace Workload.Controllers
                         batch.values.Add(VerifyMetric(wkldList[i], content.WorloadMetric));
                     }
                     last = numberBatch + 1;
+                    start += content.BatchUnit;
+                    response.Batches.Add(batch);
+                    break;
                 }
                 else
                 {
-                    for (int i = start; i <= start + content.BatchUnit; i++)
+                    for (int i = start; i < start + content.BatchUnit; i++)
                     {
                         batch.values.Add(VerifyMetric(wkldList[i], content.WorloadMetric));
                     }

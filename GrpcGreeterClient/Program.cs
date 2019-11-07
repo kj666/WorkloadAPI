@@ -95,6 +95,7 @@ namespace GrpcGreeterClient
                 });
 
                 //output reply
+                Console.WriteLine(" \n\n");
                 Console.WriteLine("Server Response: \nRFWID: " + reply.Rfw + "\nLastBatchID: " + reply.LastBatchId + "\nBatches: " + reply.Batches);
                 Console.WriteLine("Press any key to continue or type 'quit' to exit...");
 

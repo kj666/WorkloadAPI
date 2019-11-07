@@ -64,11 +64,10 @@ namespace CommunicationServer
             int start = startID;
             //Verify if batchsize ends
             int end = content.BatchId + content.BatchSize;
-            if (end > numberBatch)
-                end = numberBatch;
+
             int last = end;
 
-            for (int j = content.BatchId; j <= end; j++)
+            for (int j = content.BatchId; j < end; j++)
             {
                 Batch batch = new Batch()
                 {
@@ -81,6 +80,9 @@ namespace CommunicationServer
                         batch.Values.Add(VerifyMetric(wkldList[i], content.Metric));
                     }
                     last = numberBatch + 1;
+                    start += content.BatchUnit;
+                    response.Batches.Add(batch);
+                    break;
                 }
                 else
                 {
