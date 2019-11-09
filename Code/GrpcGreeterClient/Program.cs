@@ -11,7 +11,9 @@ namespace GrpcGreeterClient
         static async Task Main(string[] args)
         {
             // The port number(5001) must match the port of the gRPC server.
-            var channel = GrpcChannel.ForAddress("https://localhost:5001/gRPC");
+            Console.WriteLine("Type Server URL:Port");
+            string url = Console.ReadLine();
+            var channel = GrpcChannel.ForAddress(url);
             var client = new Workload.WorkloadClient(channel);
 
             while (true)

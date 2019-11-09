@@ -55,8 +55,6 @@ namespace Workload.Controllers
 
             int start = startID;
             int end = content.BatchId + content.BatchSize;
-            //if (end >= numberBatch)
-            //    end = numberBatch;
 
             int last = end;
 

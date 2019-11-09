@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunicationServer.Models;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
 
 namespace CommunicationServer
@@ -23,7 +24,23 @@ namespace CommunicationServer
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+
+                    //Windows
                     webBuilder.UseStartup<Startup>();
+                    
+                    
+                    //uncomment for mac
+                    //webBuilder.UseStartup<Startup>().ConfigureKestrel(options =>
+                    //{
+                    //    options.Limits.MinRequestBodyDataRate = null;
+
+                    //    options.ListenAnyIP(5000,
+                    //          listenOptions => { listenOptions.Protocols = HttpProtocols.Http1AndHttp2; });
+
+                    //    //options.ListenAnyIP(5001,
+                    //    //   listenOptions => { listenOptions.Protocols = HttpProtocols.Http2; });
+                    //});
+
                 });
     }
 }
