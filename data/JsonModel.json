@@ -1,0 +1,31 @@
+{
+    "Response":
+        {
+            "RfwID" : "10",
+            "BenchmarkType" :0,
+            "WorloadMetric": 0,
+            "BatchUnit": 10,
+            "BatchId": 5,
+            "BatchSize": 1000
+        },
+        
+        "Request":{
+            "rfwID": "10",
+            "lastBatchId": 7,
+            "batches": [
+                {
+                    "id": 5,
+                    "values": [54,52,48,44,42]
+                },
+                {
+                    "id": 6,
+                    "values": [54,52,48,44,42]
+                },
+                {
+                    "id": 7,
+                    "values": [54,52,48,44,42]
+                }
+            ]
+        }
+    }
+
